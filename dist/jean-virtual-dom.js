@@ -66,19 +66,380 @@ var require, define;
 })();
 define("node_modules/jean-amd/dist/jean-amd", function(){});
 
-define('src/VirtualDom',[], function () {
-    /**
-     * Virtual DOM implementation 
-     * @alias VirtualDom 
-     * @constructor
-     * @param {Object} options - options object
-     */
-    var VirtualDom = function(options){
-
+define('TypeCheck',[], function () {
+    return {
+        /**
+         * Checks if provided element type is string
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element type is string, false otherwise
+         */
+        isString: function (o) {
+            return (typeof o === "string") ? true : false;
+        },
+        /** 
+         * Checks if provided element type is boolean
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element type is boolean, false otherwise
+         */
+        isBoolean: function (o) {
+            return (typeof o === "boolean") ? true : false;
+        },
+        /**
+         * Checks if provided element type is boolean
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element type is boolean, false otherwise
+         */
+        isNumber: function (o) {
+            return (typeof o === "number") ? true : false;
+        },
+        /**
+         * Checks if provided element is an object
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element is empty, false otherwise
+         */
+        isObject: function (o) {
+            var isObject = false;
+            if (this.isString(o) || this.isFunction(o)) {
+                return false;
+            }
+            if (this.isEmptyObject(o)) {
+                return true;
+            }
+            for (var k in o) {
+                if (o.hasOwnProperty(k)) {
+                    isObject = true;
+                    break;
+                }
+            }
+            return isObject;
+        },
+        /**
+         * Checks if provided element is an empty object
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element is empty, false otherwise
+         */
+        isEmptyObject: function (o) {
+            var isEmpty = true;
+            if (!this.isDefined(o) || this.isBoolean(o) || this.isFunction(o) ||
+                this.isNumber(o) || this.isString(o) || Array.isArray(o)) {
+                return false;
+            }
+            for (var k in o) {
+                if (o.hasOwnProperty(k)) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+            return isEmpty;
+        },
+        /**
+        * Checks if provided element is a function
+        * @public
+        * @memberof TypeCheck
+        * @param {Any} o - element to be checked
+        * @returns {Boolean} True, if element is a function, false otherwise
+        */
+        isFunction: function (o) {
+            return (typeof o === "function") ? true : false;
+        },
+        /**
+         * Checks if provided element is defined
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} True, if element is defined, false otherwise
+         */
+        isDefined: function (o) {
+            return (o !== undefined && o != null);
+        },
+        /**
+         * Checks if provided element is an array
+         * @public 
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} - true if o is an array, false otherwise
+         */
+        isArray: function (o) {
+            return Array.isArray(o);
+        },
+        /**
+         * Check id provided element is an empty array
+         * @public
+         * @memberof TypeCheck
+         * @param {Any} o - element to be checked
+         * @returns {Boolean} - True if o is an empty array, false otherwise
+         */
+        isEmptyArray: function (o) {
+            return this.isArray(o) && (o.length === 0);
+        },
+        /**
+         * Checks if all elements in this array have the same type
+         * @public
+         * @memberof TypeCheck
+         * @throws {TypeError} - If options.type is not a string
+         * @throws {TypeError} - If options.array is not a string
+         * @param {Any[]} array - Array to be checked
+         * @param {String} type - Type of elements in this array. Valid values are all which matches 
+         *                        to the typeof operator
+         * @returns {Boolean} - true if all elements in the array have the same type, false otherwise
+         */
+        isArrayTypeOf: function (array, type) {
+            var isTypeOf = true;
+            if (!this.isString(type)) {
+                throw new TypeError("options.type is not a string");
+            }
+            if (!Array.isArray(array)) {
+                throw new TypeError("options.array is not an array");
+            }
+            if (array.length === 0) {
+                isTypeOf = false;
+            }
+            for (var i = 0, length = array.length; i < length; i++) {
+                var o = array[i];
+                if (typeof o !== type) {
+                    isTypeOf = false;
+                    break;
+                }
+            }
+            return isTypeOf;
+        },
+        /**
+         * Checks if all objects within array have the same instance
+         * @public
+         * @memberof TypeCheck
+         * @throws {TypeError} - If array is not an array
+         * @throws {TypeError} - If constructor is not a function
+         * @param {Object[]} array - The array which objects shall be checked
+         * @param {Function} constructor - the constructor function
+         * @returns {Boolean} - True if all elements have the same instance, false otherwise
+         */
+        areObjectsInstanceOf: function (array, constructor) {
+            if (!this.isArray(array)) {
+                throw new TypeError("array is not an array");
+            }
+            if (!this.isFunction(constructor)) {
+                throw new TypeError("constructor is not a function");
+            }
+            var i, o, length = array.length, result = true;
+            for (i = 0; i < length; i++) {
+                o = array[i];
+                if (!this.isObject(o) || !this.isInstanceOf(o, constructor)) {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
+        },
+        /**
+         * Checks if child is an instance of parent
+         * @public
+         * @memberof TypeCheck
+         * @throws {TypeError} - If child is not an object
+         * @throws {TypeError} - If parent is not a function
+         * @param {Object} child - The object which shall be checked
+         * @param {Function} parent - The function which shall be the constructor
+         * @returns {Boolean} - True if child is an instance of parent, false otherwise
+         */
+        isInstanceOf: function (child, parent) {
+            if (!this.isObject(child)) {
+                throw new TypeError("child is not an object");
+            }
+            if (!this.isFunction(parent)) {
+                throw new TypeError("parent is not a function");
+            }
+            return child instanceof parent;
+        },
+        /**
+         * Checks if the provided value is a value of the provided object which is used as an enum
+         * @throws {TypeError} - If value is not a string or a number
+         * @throws {TypeError} - If o is not an object
+         * @param {String|Number} value - the value
+         * @param {Object} o - the object which shall be checked
+         * @returns {Boolean} - True if value is part of o, false otherwise
+         */
+        isEnumValue: function (value, o) {
+            if (!this.isString(value) && !this.isNumber(value)) {
+                throw new TypeError("value must be a String or a Number");
+            }
+            if (!this.isObject(o)) {
+                throw new TypeError("o is not an object");
+            }
+            var keys = Object.keys(o), length = keys.length, i, isValue = false;
+            for (i = 0; i < length; i++) {
+                if (o[keys[i]] === value) {
+                    isValue = true;
+                    break;
+                }
+            }
+            return isValue;
+        }
     };
-
-    return VirtualDom;
 });
+define('Failure',[], function () {
+    /**
+     * Provides error throwing functionality 
+     * @alias Failure 
+     */
+    return {
+        /**
+         * Throws an Error with the provided errorMessage
+         * @throws {Error}
+         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this Error
+         */
+        throwError: function (errorMessage) {
+            throw new Error(errorMessage);
+        },
+        /**
+         * Throws an TypeError with the provided errorMessage
+         * @throws {TypeError}
+         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this TypeError
+         */
+        throwTypeError: function (errorMessage) {
+            throw new TypeError(errorMessage);
+        }
+    };
+});
+define('VirtualDomElementType',[], function () {
+    return {
+        DIV: "div",
+        H1: "h1",
+        P: "p"
+    };
+});
+define('VirtualDomElementAttributeType',[], function () {
+    return {
+        ID: "id",
+        CLASS: "class"
+    };
+});
+define('VirtualDomElementAttribute',[
+    "TypeCheck",
+    "Failure",
+    "VirtualDomElementAttributeType"
+], function (
+    TypeCheck, 
+    Failure,
+    VirtualDomElementAttributeType
+) {
+        /**
+         * Virtual DOM implementation 
+         * @alias VirtualDomElementAttribute 
+         * @constructor
+         * @param {Object} options - options object
+         * @param {VirtualDomElementAttributeType} options.type - the type of the DomElementAttribute
+         * @param {String[]} options.values - the values of the DomElementAttribute
+         */
+        var VirtualDomElementAttribute = function (options) {
+            this.type = TypeCheck.isEnumValue(options.type, VirtualDomElementAttributeType) ? options.type : Failure.throwTypeError("options.type is not a value of VirtualDomElementAttributeType");
+            this.values = TypeCheck.isArrayTypeOf(options.values, "string") ? options.values : Failure.throwTypeError("options.values contains values which are not type of string");
+        };
+        return VirtualDomElementAttribute;
+    });
+define('VirtualDomElement',[
+    "TypeCheck",
+    "Failure",
+    "VirtualDomElementType",
+    "VirtualDomElementAttribute"
+], function (
+    TypeCheck,
+    Failure,
+    VirtualDomElementType,
+    VirtualDomElementAttribute
+) {
+        /**
+         * Virtual DOM implementation 
+         * @alias DomElement 
+         * @constructor
+         * @param {Object} options - options object
+         * @param {VirtualDomElementType} options.type - the type of the VirtualDomElement
+         * @param {VirtualDomElementAttribute[]} options.attributes - the attributes of this VirtualDomElement
+         * @param {DomElement[]} options.children - the child elements of this VirtualDomElement
+         */
+        var VirtualDomElement = function (options) {
+            this.type = TypeCheck.isEnumValue(options.type, VirtualDomElementType) ? options.type : Failure.throwTypeError("options.type is not a value of VirtualDomElementType");
+            this.attributes = TypeCheck.areObjectsInstanceOf(options.attributes, VirtualDomElementAttribute) || TypeCheck.isEmptyArray(options.attributes) ? options.attributes : Failure.throwTypeError("options.attributes contains objects which are not an instance of VirtualDomElementAttribute");
+            this.children = TypeCheck.areObjectsInstanceOf(options.children, VirtualDomElement) || TypeCheck.isEmptyArray(options.children) ? options.children : Failure.throwTypeError("options.children contains objects which are not an instance of VirtualDomElement");
+            this.domElement = null;
+        };
+        return VirtualDomElement;
+    });
+define('src/VirtualDom',[ // jscs:ignore
+    "VirtualDomElement",
+    "VirtualDomElementAttribute",
+    "VirtualDomElementType",
+    "VirtualDomElementAttributeType"
+], function (
+    VirtualDomElement,
+    VirtualDomElementAttribute,
+    VirtualDomElementType,
+    VirtualDomElementAttributeType
+) {
+        /**
+         * Virtual DOM implementation 
+         * @alias VirtualDom 
+         */
+        return {
+            /**
+             * @param {VirtualDomElementType} type - the type of the VirtualDomElement
+             * @param {VirtualDomElementAttribute[]} attributes - the attributes of this VirtualDomElement
+             * @param {DomElement[]} children - the child elements of this VirtualDomElement
+             * @returns {VirtualDomElement} - The created vDom
+             */
+            createElement: function (type, attributes, children) {
+                return new VirtualDomElement({
+                    type: type,
+                    attributes: attributes,
+                    children: children
+                });
+            },
+            /**
+             * @param {VirtualDomElementAttributeType} type - the type of the DomElementAttribute
+             * @param {String[]} values - the values of the DomElementAttribute
+             */
+            createAttribute: function (type, values) {
+                return new VirtualDomElementAttribute({
+                    type: type,
+                    values: values
+                });
+            },
+            /**
+             * @param {VirtualDomElement} virtualDomElement - the vDOM element which shall be mounted
+             * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
+             */
+            mount: function (virtualDomElement, parentDomNode) {
+                var attribute, attributes = virtualDomElement.attributes, attributesLength = attributes.length,
+                    child, children = virtualDomElement.children, childrenLength = children.length, domElement,
+                    i;
+                // Create the DOM element from the vDOM element type
+                domElement = virtualDomElement.domElement = document.createElement(virtualDomElement.type);
+                // Add all attributes to the DOM element from vDOM element attributes
+                for (i = 0; i < attributesLength; i++) {
+                    attribute = attributes[i];
+                    domElement.setAttribute(attribute.type, attributes.length > 1 ? attribute.values.join(" ") : attribute.values[0]);
+                }
+                // Add all attributes to the DOM element from vDOM element attributes
+                for (i = 0; i < childrenLength; i++) {
+                    child = children[i];
+                    this.mount(child, domElement);
+                }
+                parentDomNode.appendChild(domElement);
+            },
+            ElementType: VirtualDomElementType,
+            ElementAttributeType: VirtualDomElementAttributeType,
+            ElementAttribute: VirtualDomElementAttribute,
+            Element: VirtualDomElement,
+        };
+    });
 
  	 return require('src/VirtualDom'); 
 }));

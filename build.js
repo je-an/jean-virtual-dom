@@ -19,7 +19,11 @@
             "}));"
     },
     paths: {
-        "TypeCheck": "node_modules/jean-type-check/src/jean-type-check",
-        "Failure": "node_modules/jean-failure/src/jean-failure"
+        "TypeCheck": "node_modules/jean-type-check/src/TypeCheck",
+        "Failure": "node_modules/jean-failure/src/Failure",
+        "VirtualDomElementAttributeType": "src/enum/VirtualDomElementAttributeType",
+        "VirtualDomElementType": "src/enum/VirtualDomElementType",
+        "VirtualDomElement": "src/model/VirtualDomElement",
+        "VirtualDomElementAttribute": "src/model/VirtualDomElementAttribute",
     }
 })

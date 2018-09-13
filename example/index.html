@@ -1,0 +1,61 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Flight Indicators</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="bootstrap.css">
+    <style>
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #stick-module,
+        #pedal-module,
+        #collective-module {
+            width: 100%;
+            text-align: center;
+        }
+
+        #cm-svg,
+        #compass-svg,
+        #stick-svg,
+        #pedal-svg,
+        #collective-svg {
+            width: 100%;
+        }
+
+        .row-top {
+            margin-top: 50px;
+        }
+
+        .row-standard {
+            margin-top: 15px;
+        }
+
+        .jean-navbar {
+            z-index: 100;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #40CAB4;
+            font-weight: bold;
+            font-family: "Calibri";
+        }
+    </style>
+</head>
+
+<body>
+    <section id="jean-navbar-container"></section>
+
+    <script src="jquery.js"></script>
+    <script src="../node_modules/jean-performance/dist/jean-performance.js"></script>
+    <script src="../dist/jean-virtual-dom.js"></script>
+    <script src="jean-navbar.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>

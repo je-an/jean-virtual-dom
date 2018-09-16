@@ -66,6 +66,30 @@ var require, define;
 })();
 define("node_modules/jean-amd/dist/jean-amd", function(){});
 
+define('Failure',[], function () {
+    /**
+     * Provides error throwing functionality 
+     * @alias Failure 
+     */
+    return {
+        /**
+         * Throws an Error with the provided errorMessage
+         * @throws {Error}
+         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this Error
+         */
+        throwError: function (errorMessage) {
+            throw new Error(errorMessage);
+        },
+        /**
+         * Throws an TypeError with the provided errorMessage
+         * @throws {TypeError}
+         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this TypeError
+         */
+        throwTypeError: function (errorMessage) {
+            throw new TypeError(errorMessage);
+        }
+    };
+});
 define('TypeCheck',[], function () {
     return {
         /**
@@ -214,26 +238,66 @@ define('TypeCheck',[], function () {
             return isTypeOf;
         },
         /**
-         * Checks if all objects within array have the same instance
-         * @public
-         * @memberof TypeCheck
-         * @throws {TypeError} - If array is not an array
-         * @throws {TypeError} - If constructor is not a function
-         * @param {Object[]} array - The array which objects shall be checked
-         * @param {Function} constructor - the constructor function
-         * @returns {Boolean} - True if all elements have the same instance, false otherwise
-         */
-        areObjectsInstanceOf: function (array, constructor) {
+          * Checks if all objects within array have the same instance
+          * @public
+          * @memberof TypeCheck
+          * @throws {TypeError} - If array is not an array
+          * @throws {TypeError} - If constructor is not a function
+          * @param {Object[]} array - The array which objects shall be checked
+          * @param {Function} fn - the constructor function
+          * @returns {Boolean} - True if all elements have the same instance, false otherwise
+          */
+        areObjectsInstanceOf: function (array, fn) {
             if (!this.isArray(array)) {
                 throw new TypeError("array is not an array");
             }
-            if (!this.isFunction(constructor)) {
-                throw new TypeError("constructor is not a function");
+            if (!this.isFunction(fn)) {
+                throw new TypeError("fn is not a function");
             }
             var i, o, length = array.length, result = true;
             for (i = 0; i < length; i++) {
                 o = array[i];
-                if (!this.isObject(o) || !this.isInstanceOf(o, constructor)) {
+                if (!this.isObject(o) || !this.isInstanceOf(o, fn)) {
+                    result = false;
+                    break;
+                }
+            }
+            return result;
+        },
+        /**
+         * Checks if the objects have are instances of the provided constructors
+         * @public
+         * @memberof TypeCheck
+         * @throws {TypeError} - If array is not an array
+         * @throws {TypeError} - If constructors is not an array
+         * @param {Object[]} objects - The array which objects shall be checked
+         * @param {Function[]} constructors - An array of constructor functions
+         * @returns {Boolean} - True if all elements have the same instance, false otherwise
+         */
+        areObjectsInstancesOf: function (objects, constructors) {
+            var i, j, o, length = objects.length, constructorLength = constructors.length, result = true, noConstructorMatched;
+            if (!this.isArray(objects)) {
+                throw new TypeError("objects is not an array");
+            }
+            if (!this.isArray(constructors)) {
+                throw new TypeError("constructors is not an array");
+            }
+            if (!this.isArrayTypeOf(constructors, "function")) {
+                throw new TypeError("constructors is not an array of constructor functions");
+            }
+            for (i = 0; i < length; i++) {
+                o = objects[i];
+                noConstructorMatched = true;
+                for (j = 0; j < constructorLength; j++) {
+                    if(!this.isObject(o)){
+                        break;
+                    }
+                    if (this.isInstanceOf(o, constructors[j])) {
+                        noConstructorMatched = false;
+                        break;
+                    }
+                }
+                if (noConstructorMatched === true) {
                     result = false;
                     break;
                 }
@@ -285,30 +349,25 @@ define('TypeCheck',[], function () {
         }
     };
 });
-define('Failure',[], function () {
-    /**
-     * Provides error throwing functionality 
-     * @alias Failure 
-     */
-    return {
+define('VirtualDomText',[
+    "TypeCheck",
+    "Failure"
+], function (
+    TypeCheck,
+    Failure
+) {
         /**
-         * Throws an Error with the provided errorMessage
-         * @throws {Error}
-         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this Error
+         * Virtual DOM text node 
+         * @alias VirtualDomText 
+         * @constructor
+         * @param {String|Number} value - text node value
          */
-        throwError: function (errorMessage) {
-            throw new Error(errorMessage);
-        },
-        /**
-         * Throws an TypeError with the provided errorMessage
-         * @throws {TypeError}
-         * @param {String} [errorMessage=String.Empty] - Message which shall be displayed for this TypeError
-         */
-        throwTypeError: function (errorMessage) {
-            throw new TypeError(errorMessage);
-        }
-    };
-});
+        var VirtualDomText = function (value) {
+            this.value = TypeCheck.isString(value) || TypeCheck.isNumber(value) ? value : Failure.throwTypeError("value is not a string or a number");
+        };
+        /** */
+        return VirtualDomText;
+    });
 define('VirtualDomElementType',[], function () {
     return {
         DIV: "div",
@@ -319,7 +378,8 @@ define('VirtualDomElementType',[], function () {
 define('VirtualDomElementAttributeType',[], function () {
     return {
         ID: "id",
-        CLASS: "class"
+        CLASS: "class",
+        STYLE: "style"
     };
 });
 define('VirtualDomElementAttribute',[
@@ -346,13 +406,15 @@ define('VirtualDomElementAttribute',[
         return VirtualDomElementAttribute;
     });
 define('VirtualDomElement',[
-    "TypeCheck",
     "Failure",
+    "TypeCheck",
+    "VirtualDomText",
     "VirtualDomElementType",
     "VirtualDomElementAttribute"
 ], function (
-    TypeCheck,
     Failure,
+    TypeCheck,
+    VirtualDomText,
     VirtualDomElementType,
     VirtualDomElementAttribute
 ) {
@@ -363,25 +425,32 @@ define('VirtualDomElement',[
          * @param {Object} options - options object
          * @param {VirtualDomElementType} options.type - the type of the VirtualDomElement
          * @param {VirtualDomElementAttribute[]} options.attributes - the attributes of this VirtualDomElement
-         * @param {DomElement[]} options.children - the child elements of this VirtualDomElement
+         * @param {Array<VirtualDomElement|VirtualDomText>} options.children - the child elements of this VirtualDomElement
          */
         var VirtualDomElement = function (options) {
             this.type = TypeCheck.isEnumValue(options.type, VirtualDomElementType) ? options.type : Failure.throwTypeError("options.type is not a value of VirtualDomElementType");
             this.attributes = TypeCheck.areObjectsInstanceOf(options.attributes, VirtualDomElementAttribute) || TypeCheck.isEmptyArray(options.attributes) ? options.attributes : Failure.throwTypeError("options.attributes contains objects which are not an instance of VirtualDomElementAttribute");
-            this.children = TypeCheck.areObjectsInstanceOf(options.children, VirtualDomElement) || TypeCheck.isEmptyArray(options.children) ? options.children : Failure.throwTypeError("options.children contains objects which are not an instance of VirtualDomElement");
+            this.children = TypeCheck.areObjectsInstancesOf(options.children, [VirtualDomElement, VirtualDomText]) || TypeCheck.isEmptyArray(options.children) ? options.children : Failure.throwTypeError("options.children contains objects which are not an instance of VirtualDomElement");
             this.domElement = null;
         };
+        /** */
         return VirtualDomElement;
     });
 define('src/VirtualDom',[ // jscs:ignore
+    "Failure",
+    "TypeCheck",
+    "VirtualDomText",
     "VirtualDomElement",
-    "VirtualDomElementAttribute",
     "VirtualDomElementType",
+    "VirtualDomElementAttribute",
     "VirtualDomElementAttributeType"
 ], function (
+    Failure,
+    TypeCheck,
+    VirtualDomText,
     VirtualDomElement,
-    VirtualDomElementAttribute,
     VirtualDomElementType,
+    VirtualDomElementAttribute,    
     VirtualDomElementAttributeType
 ) {
         /**
@@ -393,7 +462,7 @@ define('src/VirtualDom',[ // jscs:ignore
              * @param {VirtualDomElementType} type - the type of the VirtualDomElement
              * @param {VirtualDomElementAttribute[]} attributes - the attributes of this VirtualDomElement
              * @param {DomElement[]} children - the child elements of this VirtualDomElement
-             * @returns {VirtualDomElement} - The created vDom
+             * @returns {VirtualDomElement} - The created vDom element
              */
             createElement: function (type, attributes, children) {
                 return new VirtualDomElement({
@@ -405,6 +474,7 @@ define('src/VirtualDom',[ // jscs:ignore
             /**
              * @param {VirtualDomElementAttributeType} type - the type of the DomElementAttribute
              * @param {String[]} values - the values of the DomElementAttribute
+             * @returns {VirtualDomElementAttribute} - the create vDom element attribute
              */
             createAttribute: function (type, values) {
                 return new VirtualDomElementAttribute({
@@ -413,10 +483,30 @@ define('src/VirtualDom',[ // jscs:ignore
                 });
             },
             /**
+             * @param {String[]} values - the values of the vDom text
+             * @returns {VirtualDomText} - the create vDom text 
+             */
+            createText: function (value) {
+                return new VirtualDomText(value);
+            },
+            /**
+             * @param {VirtualDomElement|VirtualDomText} input - the vDOM element which shall be mounted
+             * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
+             */
+            mount: function (input, parentDomNode) {
+                if (TypeCheck.isInstanceOf(input, VirtualDomElement)) {
+                    this._mountVirtualDomElement(input, parentDomNode)
+                } else if (TypeCheck.isInstanceOf(input, VirtualDomText)) {
+                    this._mountVirtualDomText(input, parentDomNode);
+                } else {
+                    Failure.throwError("input is not an instance of VirtualDomElement or VirtualDomText");
+                }
+            },
+            /**
              * @param {VirtualDomElement} virtualDomElement - the vDOM element which shall be mounted
              * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
              */
-            mount: function (virtualDomElement, parentDomNode) {
+            _mountVirtualDomElement: function (virtualDomElement, parentDomNode) {
                 var attribute, attributes = virtualDomElement.attributes, attributesLength = attributes.length,
                     child, children = virtualDomElement.children, childrenLength = children.length, domElement,
                     i;
@@ -434,10 +524,18 @@ define('src/VirtualDom',[ // jscs:ignore
                 }
                 parentDomNode.appendChild(domElement);
             },
-            ElementType: VirtualDomElementType,
-            ElementAttributeType: VirtualDomElementAttributeType,
-            ElementAttribute: VirtualDomElementAttribute,
+              /**
+             * @param {VirtualDomText} virtualDomText - the vDOM text element which shall be mounted
+             * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
+             */
+            _mountVirtualDomText: function (virtualDomText, parentDomNode) {
+                parentDomNode.textContent = virtualDomText.value;
+            },
+            Text: VirtualDomText,
             Element: VirtualDomElement,
+            ElementType: VirtualDomElementType,
+            ElementAttribute: VirtualDomElementAttribute,
+            ElementAttributeType: VirtualDomElementAttributeType
         };
     });
 

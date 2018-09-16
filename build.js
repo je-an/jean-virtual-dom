@@ -25,5 +25,6 @@
         "VirtualDomElementType": "src/enum/VirtualDomElementType",
         "VirtualDomElement": "src/model/VirtualDomElement",
         "VirtualDomElementAttribute": "src/model/VirtualDomElementAttribute",
+        "VirtualDomText": "src/model/VirtualDomText"
     }
 })

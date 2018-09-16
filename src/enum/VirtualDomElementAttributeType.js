@@ -1,6 +1,7 @@
 define([], function () {
     return {
         ID: "id",
-        CLASS: "class"
+        CLASS: "class",
+        STYLE: "style"
     };
 });

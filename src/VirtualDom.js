@@ -25,7 +25,7 @@ define([ // jscs:ignore
             /**
              * @param {VirtualDomElementType} type - the type of the VirtualDomElement
              * @param {VirtualDomElementAttribute[]} attributes - the attributes of this VirtualDomElement
-             * @param {DomElement[]} children - the child elements of this VirtualDomElement
+             * @param {VirtualDomElement[]} children - the child elements of this VirtualDomElement
              * @returns {VirtualDomElement} - The created vDom element
              */
             createElement: function (type, attributes, children) {
@@ -36,8 +36,8 @@ define([ // jscs:ignore
                 });
             },
             /**
-             * @param {VirtualDomElementAttributeType} type - the type of the DomElementAttribute
-             * @param {String[]} values - the values of the DomElementAttribute
+             * @param {VirtualDomElementAttributeType} type - the type of the VirtualDomElementAttribute
+             * @param {String[]} values - the values of the VirtualDomElementAttribute
              * @returns {VirtualDomElementAttribute} - the create vDom element attribute
              */
             createAttribute: function (type, values) {
@@ -59,7 +59,7 @@ define([ // jscs:ignore
              */
             mount: function (input, parentDomNode) {
                 if (TypeCheck.isInstanceOf(input, VirtualDomElement)) {
-                    this._mountVirtualDomElement(input, parentDomNode)
+                    this._mountVirtualDomElement(input, parentDomNode);
                 } else if (TypeCheck.isInstanceOf(input, VirtualDomText)) {
                     this._mountVirtualDomText(input, parentDomNode);
                 } else {

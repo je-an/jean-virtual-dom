@@ -349,25 +349,6 @@ define('TypeCheck',[], function () {
         }
     };
 });
-define('VirtualDomText',[
-    "TypeCheck",
-    "Failure"
-], function (
-    TypeCheck,
-    Failure
-) {
-        /**
-         * Virtual DOM text node 
-         * @alias VirtualDomText 
-         * @constructor
-         * @param {String|Number} value - text node value
-         */
-        var VirtualDomText = function (value) {
-            this.value = TypeCheck.isString(value) || TypeCheck.isNumber(value) ? value : Failure.throwTypeError("value is not a string or a number");
-        };
-        /** */
-        return VirtualDomText;
-    });
 define('VirtualDomElementType',[], function () {
     return {
         DIV: "div",
@@ -405,6 +386,50 @@ define('VirtualDomElementAttribute',[
         };
         return VirtualDomElementAttribute;
     });
+define('ComponentBase',[ // jscs:ignore
+    "Failure",
+    "TypeCheck",
+    "VirtualDomElementType",
+    "VirtualDomElementAttribute"
+], function (
+    Failure,
+    TypeCheck,
+    VirtualDomElementType,
+    VirtualDomElementAttribute
+) {
+        /**
+         * Virtual DOM implementation 
+         * @alias ComponentBase
+         * @constructor
+         * @param {Object} options - options object
+         */
+        var ComponentBase = function (options) {
+        };
+        /** */
+        ComponentBase.prototype.render = function () {
+
+        };
+        return ComponentBase;
+    });
+define('VirtualDomText',[
+    "TypeCheck",
+    "Failure"
+], function (
+    TypeCheck,
+    Failure
+) {
+        /**
+         * Virtual DOM text node 
+         * @alias VirtualDomText 
+         * @constructor
+         * @param {String|Number} value - text node value
+         */
+        var VirtualDomText = function (value) {
+            this.value = TypeCheck.isString(value) || TypeCheck.isNumber(value) ? value : Failure.throwTypeError("value is not a string or a number");
+        };
+        /** */
+        return VirtualDomText;
+    });
 define('VirtualDomElement',[
     "Failure",
     "TypeCheck",
@@ -439,6 +464,7 @@ define('VirtualDomElement',[
 define('src/VirtualDom',[ // jscs:ignore
     "Failure",
     "TypeCheck",
+    "ComponentBase",
     "VirtualDomText",
     "VirtualDomElement",
     "VirtualDomElementType",
@@ -447,6 +473,7 @@ define('src/VirtualDom',[ // jscs:ignore
 ], function (
     Failure,
     TypeCheck,
+    ComponentBase,
     VirtualDomText,
     VirtualDomElement,
     VirtualDomElementType,
@@ -461,7 +488,7 @@ define('src/VirtualDom',[ // jscs:ignore
             /**
              * @param {VirtualDomElementType} type - the type of the VirtualDomElement
              * @param {VirtualDomElementAttribute[]} attributes - the attributes of this VirtualDomElement
-             * @param {DomElement[]} children - the child elements of this VirtualDomElement
+             * @param {VirtualDomElement[]} children - the child elements of this VirtualDomElement
              * @returns {VirtualDomElement} - The created vDom element
              */
             createElement: function (type, attributes, children) {
@@ -472,8 +499,8 @@ define('src/VirtualDom',[ // jscs:ignore
                 });
             },
             /**
-             * @param {VirtualDomElementAttributeType} type - the type of the DomElementAttribute
-             * @param {String[]} values - the values of the DomElementAttribute
+             * @param {VirtualDomElementAttributeType} type - the type of the VirtualDomElementAttribute
+             * @param {String[]} values - the values of the VirtualDomElementAttribute
              * @returns {VirtualDomElementAttribute} - the create vDom element attribute
              */
             createAttribute: function (type, values) {
@@ -495,7 +522,7 @@ define('src/VirtualDom',[ // jscs:ignore
              */
             mount: function (input, parentDomNode) {
                 if (TypeCheck.isInstanceOf(input, VirtualDomElement)) {
-                    this._mountVirtualDomElement(input, parentDomNode)
+                    this._mountVirtualDomElement(input, parentDomNode);
                 } else if (TypeCheck.isInstanceOf(input, VirtualDomText)) {
                     this._mountVirtualDomText(input, parentDomNode);
                 } else {
@@ -535,7 +562,8 @@ define('src/VirtualDom',[ // jscs:ignore
             Element: VirtualDomElement,
             ElementType: VirtualDomElementType,
             ElementAttribute: VirtualDomElementAttribute,
-            ElementAttributeType: VirtualDomElementAttributeType
+            ElementAttributeType: VirtualDomElementAttributeType,
+            ComponentBase: ComponentBase
         };
     });
 

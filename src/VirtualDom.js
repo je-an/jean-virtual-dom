@@ -1,6 +1,7 @@
 define([ // jscs:ignore
     "Failure",
     "TypeCheck",
+    "ComponentBase",
     "VirtualDomText",
     "VirtualDomElement",
     "VirtualDomElementType",
@@ -9,6 +10,7 @@ define([ // jscs:ignore
 ], function (
     Failure,
     TypeCheck,
+    ComponentBase,
     VirtualDomText,
     VirtualDomElement,
     VirtualDomElementType,
@@ -45,7 +47,7 @@ define([ // jscs:ignore
                 });
             },
             /**
-             * @param {String[]} values - the values of the vDom text
+             * @param {String} value - the value of the vDom text
              * @returns {VirtualDomText} - the create vDom text 
              */
             createText: function (value) {
@@ -86,7 +88,7 @@ define([ // jscs:ignore
                 }
                 parentDomNode.appendChild(domElement);
             },
-              /**
+            /**
              * @param {VirtualDomText} virtualDomText - the vDOM text element which shall be mounted
              * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
              */
@@ -97,6 +99,7 @@ define([ // jscs:ignore
             Element: VirtualDomElement,
             ElementType: VirtualDomElementType,
             ElementAttribute: VirtualDomElementAttribute,
-            ElementAttributeType: VirtualDomElementAttributeType
+            ElementAttributeType: VirtualDomElementAttributeType,
+            ComponentBase: ComponentBase
         };
     });

@@ -483,7 +483,7 @@ define('src/VirtualDom',[ // jscs:ignore
                 });
             },
             /**
-             * @param {String[]} values - the values of the vDom text
+             * @param {String} value - the value of the vDom text
              * @returns {VirtualDomText} - the create vDom text 
              */
             createText: function (value) {
@@ -524,7 +524,7 @@ define('src/VirtualDom',[ // jscs:ignore
                 }
                 parentDomNode.appendChild(domElement);
             },
-              /**
+            /**
              * @param {VirtualDomText} virtualDomText - the vDOM text element which shall be mounted
              * @param {HTMLElement} parentDomNode - the parent DOM node to which the vDOM shall be mounted
              */

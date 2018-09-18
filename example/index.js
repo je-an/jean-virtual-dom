@@ -34,3 +34,11 @@ $(document).ready(function () {
     VirtualDom.mount(myApp, document.getElementById("v-dom-container"));
     Performance.stopMeasurement();
 });
+
+var array = new Uint8Array(128);
+window.crypto.getRandomValues(array);
+
+console.log("Your lucky numbers:");
+for (var i = 0; i < array.length; i++) {
+    console.log(array[i]);
+}

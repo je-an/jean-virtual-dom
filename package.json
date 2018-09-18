@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "jean-amd": "1.0.1",
-    "jean-type-check": "^1.5.0"
+    "jean-type-check": "^1.5.0",
+    "jean-uuid": "^1.0.4"
   },
   "repository": {
     "type": "git",
